@@ -46,5 +46,7 @@ if __name__ == '__main__':
     import timeit
     create_mapping(1000000)
     gl_bytes_list.sort()
-    print (timeit.timeit('assert 1000000 == test_get_mapping()', 'from __main__ import test_get_mapping', number=10))
+    
+    t = timeit.timeit('assert 1000000 == test_get_mapping()', 'from __main__ import test_get_mapping', number=10)
+    print ('%f seconds (10 times) - excluding create_mapping().' % (t,))
     
