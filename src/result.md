@@ -106,3 +106,21 @@ LOG_LEVEL_CRITICAL
 10 times - single_write_log(100000): 0.928845 seconds
 10 times - multi_write_log(5, 100000): 4.610774 seconds
 ```
+
+#### `big_integer_or_ctypes.py`
+
+测试环境：
+```
+Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz(2601 MHz)
+8.00 GB (1600 MHz)
+500 GB Seagate ST500LM000-SSHD-8GB
+Windows 8.1 (64-bits)
+```
+
+结果：在这里的递增序列取模应用上，ctypes 比 pure python 操作要慢。将大数分割成一个个段 `test_big_integer_segmented` 比直接操作大数 `test_big_integer` 要快一倍多。
+```
+2 times: test_big_integer(2*10**7): 6.858736 seconds
+2 times: test_ctypes(2*10**7): 10.698558 seconds
+2 times: test_big_integer_segmented(2*10**7): 3.050504 seconds
+2 times: test_ctypes_segmented(2*10**7): 10.599173 seconds
+```
