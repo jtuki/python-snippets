@@ -18,10 +18,11 @@ logging.config.fileConfig("./logger.conf")
 
 LOG_LEVEL_DEBUG     = 0
 LOG_LEVEL_INFO      = 1
-LOG_LEVEL_ERROR     = 2
-LOG_LEVEL_CRITICAL  = 3
+LOG_LEVEL_WARNING   = 2
+LOG_LEVEL_ERROR     = 3
+LOG_LEVEL_CRITICAL  = 4
 
-_log_level = [LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_ERROR, LOG_LEVEL_CRITICAL]
+_log_level = [LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR, LOG_LEVEL_CRITICAL]
 
 class SimpleLoggingWrapper(object):
     def __init__(self, log_level):
@@ -40,6 +41,12 @@ class SimpleLoggingWrapper(object):
             return
         else:
             self.logger.info(log_msg)
+            
+    def warning(self, log_msg):
+        if self.log_level > LOG_LEVEL_WARNING:
+            return
+        else:
+            self.logger.warning(log_msg)
             
     def error(self, log_msg):
         if self.log_level > LOG_LEVEL_ERROR:
