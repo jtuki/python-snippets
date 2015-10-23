@@ -135,12 +135,21 @@ Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz(2601 MHz)
 Windows 8.1 (64-bits)
 ```
 
-结果：`del` 操作特别慢。
+结果：
+没有使用 `writeback` 特性的时候，`del` 操作特别慢。
+使用 `writeback` 特性后，`read` 操作特别慢。
+
 ```
 create_keywords(10000): 0.009784 seconds
 create_unordered_list(10000): 0.042733 seconds
+===============> writeback not used
 test_shelve_insert_new(10000): 9.564456 seconds
 test_shelve_random_update(10000): 5.128499 seconds
 test_shelve_random_read(10000): 1.102697 seconds
 test_shelve_random_delete(10000): 170.161228 seconds
+===============> writeback used
+test_shelve_insert_new_cached(10000): 0.241240 seconds
+test_shelve_random_update_cached(10000): 0.237398 seconds
+test_shelve_random_read_cached(10000): 216.275443 seconds
+test_shelve_random_delete_cached(10000): 0.229228 seconds
 ```

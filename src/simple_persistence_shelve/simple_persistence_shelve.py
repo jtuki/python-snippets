@@ -65,7 +65,6 @@ def create_unordered_list(n):
         del m_seq[j]
     
     assert len(gl_unordered_list) == n
-    
 
 def test_shelve_insert_new(n):
     global db_file
@@ -120,6 +119,65 @@ def test_shelve_random_delete(n):
         del db[w]
     db.close()
     
+r"""Below are the cached version (refer to writeback option of shelve.)
+"""
+    
+db_cached_index_name = "map_db"
+    
+def test_shelve_insert_new_cached(n):
+    global db_file
+    global gl_keywords_list
+    
+    assert len(gl_keywords_list) == n
+    
+    # https://docs.python.org/3/library/shelve.html#shelve.open
+    # always create a new db for reading and writing
+    db = shelve.open(db_file, 'n', writeback=True)
+    db[db_cached_index_name] = dict()
+    for w in gl_keywords_list:
+        db[db_cached_index_name][w] = w*3
+    db.close() # automatically sync and close
+
+def test_shelve_random_update_cached(n):
+    global db_file
+    global words
+    global gl_keywords_list
+    global gl_unordered_list
+    assert len(gl_keywords_list) == n
+    assert len(gl_unordered_list) == n
+    
+    db = shelve.open(db_file, 'w', writeback=True)
+    for i in gl_unordered_list:
+        w = gl_keywords_list[i]
+        db[db_cached_index_name][w] = w*2
+    db.close()
+
+def test_shelve_random_read_cached(n):
+    global db_file
+    global words
+    global gl_keywords_list
+    assert len(gl_keywords_list) == n
+    assert len(gl_unordered_list) == n
+    
+    db = shelve.open(db_file, 'r')
+    for i in gl_unordered_list:
+        w = gl_keywords_list[i]
+        r = db[db_cached_index_name][w]
+    db.close()
+    
+def test_shelve_random_delete_cached(n):
+    global db_file
+    global words
+    global gl_keywords_list
+    assert len(gl_keywords_list) == n
+    assert len(gl_unordered_list) == n
+    
+    db = shelve.open(db_file, 'w', writeback=True)
+    for i in gl_unordered_list:
+        w = gl_keywords_list[i]
+        del db[db_cached_index_name][w]
+    db.close()
+    
 if __name__ == '__main__':
     import timeit
     
@@ -131,15 +189,32 @@ if __name__ == '__main__':
     t = timeit.timeit("create_unordered_list(%d)" % (n_keywords), "from __main__ import create_unordered_list", number=1)
     print("create_unordered_list(%d): %f seconds" % (n_keywords, t))
     
+    print ("===============> writeback not used")
+    
     t = timeit.timeit("test_shelve_insert_new(%d)" % (n_keywords), "from __main__ import test_shelve_insert_new", number=1)
     print("test_shelve_insert_new(%d): %f seconds" % (n_keywords, t))
     
     t = timeit.timeit("test_shelve_random_update(%d)" % (n_keywords), "from __main__ import test_shelve_random_update", number=1)
     print("test_shelve_random_update(%d): %f seconds" % (n_keywords, t))
     
-    t = timeit.timeit("test_shelve_random_read(%d)" % (n_keywords), "from __main__ import test_shelve_random_read", number=1)
-    print("test_shelve_random_read(%d): %f seconds" % (n_keywords, t))
+    t = timeit.timeit("test_shelve_random_read(%d)" % (n_keywords), "from __main__ import test_shelve_random_read", number=5)
+    print("5 times - test_shelve_random_read(%d): %f seconds" % (n_keywords, t))
     
     t = timeit.timeit("test_shelve_random_delete(%d)" % (n_keywords), "from __main__ import test_shelve_random_delete", number=1)
     print("test_shelve_random_delete(%d): %f seconds" % (n_keywords, t))
+    
+    # cached (writeback enabled) version.
+    print ("===============> writeback used")
+    
+    t = timeit.timeit("test_shelve_insert_new_cached(%d)" % (n_keywords), "from __main__ import test_shelve_insert_new_cached", number=1)
+    print("test_shelve_insert_new_cached(%d): %f seconds" % (n_keywords, t))
+    
+    t = timeit.timeit("test_shelve_random_update_cached(%d)" % (n_keywords), "from __main__ import test_shelve_random_update_cached", number=1)
+    print("test_shelve_random_update_cached(%d): %f seconds" % (n_keywords, t))
+    
+    t = timeit.timeit("test_shelve_random_read_cached(%d)" % (n_keywords), "from __main__ import test_shelve_random_read_cached", number=1)
+    print("test_shelve_random_read_cached(%d): %f seconds" % (n_keywords, t))
+    
+    t = timeit.timeit("test_shelve_random_delete_cached(%d)" % (n_keywords), "from __main__ import test_shelve_random_delete_cached", number=1)
+    print("test_shelve_random_delete_cached(%d): %f seconds" % (n_keywords, t))
     
