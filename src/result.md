@@ -133,23 +133,37 @@ Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz(2601 MHz)
 8.00 GB (1600 MHz)
 500 GB Seagate ST500LM000-SSHD-8GB
 Windows 8.1 (64-bits)
+
+Python 3.3
 ```
 
-结果：
-没有使用 `writeback` 特性的时候，`del` 操作特别慢。
-使用 `writeback` 特性后，`read` 操作特别慢。
+结果：注意其中的 `writeback=True` 的操作。文件里的注释描述了其含义。
 
 ```
-create_keywords(10000): 0.009784 seconds
-create_unordered_list(10000): 0.042733 seconds
-===============> writeback not used
-test_shelve_insert_new(10000): 9.564456 seconds
-test_shelve_random_update(10000): 5.128499 seconds
-test_shelve_random_read(10000): 1.102697 seconds
-test_shelve_random_delete(10000): 170.161228 seconds
-===============> writeback used
-test_shelve_insert_new_cached(10000): 0.241240 seconds
-test_shelve_random_update_cached(10000): 0.237398 seconds
-test_shelve_random_read_cached(10000): 216.275443 seconds
-test_shelve_random_delete_cached(10000): 0.229228 seconds
+r"""Below are the writeback=True version.
+Note:
+db['key_name'] = [1]        # assignment operation: always update 'key_name' in @db
+del db['key_name']          # delete operation: always delete 'key_name' in @db if 'key_name' in db == True
+db['key_name'].append(2)    # only work if "writeback=True" option is enabled when open @db
+db.sync()                   # only work if "writeback=True" option is enabled when open @db
+db.close()                  # automatically call db.sync() when close @db
+"""
 ```
+
+```
+create_keywords(10000): 0.008155 seconds
+create_unordered_list(10000): 0.051670 seconds
+## writeback not used => only assignment or del
+test_shelve_insert_new(10000): 3.304961 seconds
+test_shelve_random_update(10000): 3.360600 seconds
+5 times - test_shelve_random_read(10000): 5.669415 seconds
+test_shelve_random_delete(10000): 177.601023 seconds
+## writeback used => list append or new map member assignment etc.
+test_shelve_insert_new_writeback(10000): 0.019627 seconds
+test_shelve_random_update_writeback(10000): 0.042391 seconds
+test_shelve_random_read_writeback(10000): 228.622498 seconds
+test_shelve_random_read_writeback_faster(10000): 0.026705 seconds
+test_shelve_random_delete_writeback(10000): 0.034166 seconds
+```
+
+以上是在 windows 下做的测试。其 dbm engine 是 `dbm.dumb` 即最一般化（Python distribution 自带，各个系统可移植）的实现。
