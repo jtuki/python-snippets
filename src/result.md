@@ -150,6 +150,7 @@ db.close()                  # automatically call db.sync() when close @db
 """
 ```
 
+注意其中 `read` 和 `read_faster` 两个版本的差别。因为 `writeback` 测试里，每次 read 都需要读取很大的一个字典，因此读取操作占据了很多时间；如果只是一开始读取（全程只是 r 没有 w），之后从最开始读取的结果里进行查询，就快很多了。
 ```
 create_keywords(10000): 0.008155 seconds
 create_unordered_list(10000): 0.051670 seconds
@@ -167,3 +168,21 @@ test_shelve_random_delete_writeback(10000): 0.034166 seconds
 ```
 
 以上是在 windows 下做的测试。其 dbm engine 是 `dbm.dumb` 即最一般化（Python distribution 自带，各个系统可移植）的实现。
+
+
+以下是在 linux 虚拟机上做的测试（ubuntu 64-bits vmware CPU-virtualization enabled），linux 上的 dbm 是 gnu dbm，从测试结果来看比 dumb dbm 速度要快。
+```
+create_keywords(10000): 0.008049 seconds
+create_unordered_list(10000): 0.034875 seconds
+## writeback not used => only assignment or del
+test_shelve_insert_new(10000): 0.283538 seconds
+test_shelve_random_update(10000): 0.325672 seconds
+5 times - test_shelve_random_read(10000): 0.274825 seconds
+test_shelve_random_delete(10000): 0.175219 seconds
+## writeback used => list append or new map member assignment etc.
+test_shelve_insert_new_writeback(10000): 0.050947 seconds
+test_shelve_random_update_writeback(10000): 0.041354 seconds
+test_shelve_random_read_writeback(10000): 139.833156 seconds
+test_shelve_random_read_writeback_faster(10000): 0.020831 seconds
+test_shelve_random_delete_writeback(10000): 0.035511 seconds
+```
