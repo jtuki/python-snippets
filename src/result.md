@@ -91,7 +91,7 @@ multi_write_log(5, 100000): 38.619185 seconds
 ```
 相对于 `formatter_complete_form` 的情况，要稍微快一些。
 
-#### `simple_logging_wrapper_test.py`
+#### `/simple_logging_wrapper_test.py`
 
 做了一个简单的封装，通过设定基本的 `simple_logging_wrapper.LOG_LEVEL_xyz` 参数，做一个基本的过滤，缓解「不输出（空载）也会消耗较多时间」的情况。
 
@@ -107,7 +107,7 @@ LOG_LEVEL_CRITICAL
 10 times - multi_write_log(5, 100000): 4.610774 seconds
 ```
 
-#### `big_integer_or_ctypes.py`
+### `big_integer_or_ctypes.py`
 
 测试环境：
 ```
@@ -123,4 +123,24 @@ Windows 8.1 (64-bits)
 2 times: test_ctypes(2*10**7): 10.698558 seconds
 2 times: test_big_integer_segmented(2*10**7): 3.050504 seconds
 2 times: test_ctypes_segmented(2*10**7): 10.599173 seconds
+```
+
+### `simple_persistence_shelve/simple_persistence_shelve.py`
+
+测试环境：
+```
+Intel(R) Core(TM) i7-4510U CPU @ 2.00GHz(2601 MHz)
+8.00 GB (1600 MHz)
+500 GB Seagate ST500LM000-SSHD-8GB
+Windows 8.1 (64-bits)
+```
+
+结果：`del` 操作特别慢。
+```
+create_keywords(10000): 0.009784 seconds
+create_unordered_list(10000): 0.042733 seconds
+test_shelve_insert_new(10000): 9.564456 seconds
+test_shelve_random_update(10000): 5.128499 seconds
+test_shelve_random_read(10000): 1.102697 seconds
+test_shelve_random_delete(10000): 170.161228 seconds
 ```
